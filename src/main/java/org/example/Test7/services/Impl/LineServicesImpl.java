@@ -4,28 +4,38 @@ import lombok.RequiredArgsConstructor;
 import org.example.Test7.services.LineServices;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isNumeric;
 
 
 @Service
 @RequiredArgsConstructor
 public class LineServicesImpl implements LineServices {
-
     @Override
-    public String calculateAndSort(String page) throws IOException {
+    public String calculateAndSort(String page) {
+//        Проверяем валидность вводимых данных, если ввод не корректен выводим сообщение:
+
+        if (page == null || page.isBlank() || isNumeric(page) || page.contains("а")) {
+            return "Ошибка валидации сущности." +
+                    " Введите буквы латинского алфавита (Aa-Zz): ";
+        }
+//        Создаём дополнительные инструменты и записываем ввод:
+
         Map<Character, Integer> map = new HashMap<>();
         String abc = "abcdefghijklmnopqrstuvwxyz";
         char[] abcArray = abc.toCharArray();
-        ArrayList<Character> alphabet = new ArrayList<Character>();
-        for (int i = 0; i < abcArray.length; i++){
-            alphabet.add(abcArray[i]);
+        ArrayList<Character> alphabet = new ArrayList<>();
+        for (char c : abcArray) {
+            alphabet.add(c);
         }
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
         for (int i = 0; i < 1; i++){
             list.add(page.toLowerCase());
         }
+//        Получаем искомые значения и записываем в карту:
+
         for (Character ch: alphabet){
             int count = 0;
             for (String str: list){
@@ -43,6 +53,8 @@ public class LineServicesImpl implements LineServices {
                 map.put(ch, count);
             }
         }
+//        Сортируем:
+
         Map<Character, Integer> sortedMap = map.entrySet().stream()
                 .sorted(Comparator.comparingInt(e -> -e.getValue()))
                 .collect(Collectors.toMap(
@@ -51,7 +63,7 @@ public class LineServicesImpl implements LineServices {
                         (a, b) -> { throw new AssertionError(); },
                         LinkedHashMap::new
                 ));
-        return sortedMap.toString();
+        return "Искомое значение: " + sortedMap;
     }
 }
 
